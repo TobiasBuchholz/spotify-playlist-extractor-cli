@@ -18,6 +18,10 @@
     ],
     "outputPath": "dist"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TobiasBuchholz/spotify-playlist-extractor-cli.git"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
