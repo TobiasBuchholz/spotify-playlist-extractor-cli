@@ -1,0 +1,39 @@
+{
+  "name": "spotify-playlist-extractor-cli",
+  "bin": "index.js",
+  "version": "1.0.3",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "pkg": {
+    "assets": [
+      "views/*",
+      "node_modules/figlet/fonts/*"
+    ],
+    "targets": [
+      "node14-macos-x64",
+      "node14-win-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.0",
+    "chalk": "^4.1.0",
+    "chalk-animation": "^1.6.0",
+    "cli-spinners": "^2.6.1",
+    "cli-table": "^0.3.11",
+    "express": "^4.17.3",
+    "fast-csv": "^4.3.6",
+    "figlet": "^1.5.2",
+    "inquirer": "^8.2.0",
+    "open": "^8.4.0",
+    "ora": "^5.4.1",
+    "puns.dev": "^0.2.2",
+    "query-string": "^7.1.1"
+  }
+}
