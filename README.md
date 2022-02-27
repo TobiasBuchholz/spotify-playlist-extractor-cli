@@ -2,7 +2,7 @@
 
 This is just a fun project to see how far you can go when writing your own command line tool.
 
-[![npm-title.png](https://i.postimg.cc/0QKGLP1c/npm-title.png)](https://postimg.cc/cgZ83qHn)
+[![npm-title.png](https://github.com/TobiasBuchholz/spotify-playlist-extractor-cli/blob/main/npm-title.png?raw=true)](https://postimg.cc/cgZ83qHn)
 
 To try it out immediately in your terminal just run:
 
