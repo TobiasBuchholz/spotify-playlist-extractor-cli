@@ -9,8 +9,7 @@ const path = require('path');
 const open = require('open')
 const querystring = require('query-string');
 const axios = require('axios').default;
-const fastcsv = require("fast-csv");
-const fs = require("fs");
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const Table = require('cli-table');
 const figlet = require('figlet');
 const chalk = require("chalk");
@@ -77,16 +76,27 @@ async function getAccessToken(code) {
 }
 
 async function getPlaylists() {
-  const response = await axios.create({
-    baseURL: 'https://api.spotify.com/v1',
+  const response = await simpleGet('https://api.spotify.com/v1/me/playlists');
+  var playlists = response.data.items;
+  var nextUrl = response.data.next;
+
+  while(nextUrl) {
+    const nextResponse = await simpleGet(nextUrl)
+    playlists = playlists.concat(nextResponse.data.items);
+    nextUrl = nextResponse.data.next;
+  }
+  return playlists;
+}
+
+async function simpleGet(url) {
+  return await axios.create({
+    baseURL: url,
     headers: {
       'Authorization': `Bearer ${accessToken}`,
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
-  }).get('/me/playlists');
-
-  return response.data.items;
+  }).get();
 }
 
 async function askForPlaylistAndDisplayTracks() {
@@ -141,17 +151,6 @@ function displayTracks(tracks) {
   console.log(table.toString() + '\n');
 }
 
-async function simpleGet(url) {
-  return await axios.create({
-    baseURL: url,
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-  }).get();
-}
-
 async function askWhatsNext(playlistName = null, tracks = null) {
   const choices = Array.of();
   const choiceExport = 'Export this playlist to disk';
@@ -185,16 +184,21 @@ async function exportTracksToCsv(playlistName, tracks) {
   startSpinner('Exporting playlist to disk..')
   await sleep(1000);
 
-  const ws = fs.createWriteStream(`${os.homedir()}/Downloads/${playlistName}.csv`);
-  fastcsv
-    .write(tracks, { headers: true })
-    .on("finish", function() {
-      stopSpinner();
-      console.log(`  Boom! Your playlist was exported successfully, take a look at: ${ws.path}\n`);
-      ws.end();
-      askWhatsNext();
-    })
-    .pipe(ws); 
+  const filePath = `${os.homedir()}/Downloads/${playlistName.replace('/', '_').replace(/\./g, '')}.csv`;
+  const csvWriter = createCsvWriter({
+    path: filePath,
+    header: [
+        {id: 'track', title: 'Track'},
+        {id: 'artist', title: 'Artist'},
+        {id: 'album', title: 'Album'},
+        {id: 'spotify_url', title: 'Spotify-Url'}
+    ]
+  });
+
+  await csvWriter.writeRecords(tracks);
+  stopSpinner();
+  console.log(`  Boom! Your playlist was exported successfully, take a look at: ${filePath}\n`);
+  askWhatsNext();
 }
 
 async function exit() {
