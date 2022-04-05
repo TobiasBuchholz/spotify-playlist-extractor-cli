@@ -134,20 +134,33 @@ async function getPlaylistTracks(playlist) {
   return tracks.map(x => { 
     return {
       track: x.name,
+      duration: msToTime(x.duration_ms),
       artist: x.artists[0].name,
       album: x.album.name,
+      release_date: x.album.release_date,
       spotify_url: x.external_urls.spotify
     }
   });;
 }
 
+function msToTime(duration) {
+  let seconds = parseInt((duration / 1000) % 60);
+  let minutes = parseInt((duration / (1000*60)) % 60);
+  let hours = parseInt((duration / (1000 * 60 * 60)) % 24);
+
+  hours = hours < 10 ? "0" + hours : hours;
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  seconds = seconds < 10 ? "0" + seconds : seconds;
+  return hours + ":" + minutes + ":" + seconds;
+}
+
 function displayTracks(tracks) {
   var table = new Table({
-    head: [chalk.green('Track'), chalk.green('Artist'), chalk.green('Album'), chalk.green('Spotify-Url')], 
-    colWidths: [50, 30, 40, 60]
+    head: [chalk.green('Track'), chalk.green('Duration'), chalk.green('Artist'), chalk.green('Album'), chalk.green('Release-Date'), chalk.green('Spotify-Url')], 
+    colWidths: [30, 12, 30, 30, 14, 60]
   });
   
-  tracks.forEach(x => table.push([ x.track, x.artist, x.album, x.spotify_url ]));
+  tracks.forEach(x => table.push([ x.track, x.duration, x.artist, x.album, x.release_date, x.spotify_url ]));
   console.log(table.toString() + '\n');
 }
 
@@ -189,9 +202,11 @@ async function exportTracksToCsv(playlistName, tracks) {
     path: filePath,
     header: [
         {id: 'track', title: 'Track'},
+        {id: 'duration', title: 'Duration'},
         {id: 'artist', title: 'Artist'},
         {id: 'album', title: 'Album'},
-        {id: 'spotify_url', title: 'Spotify-Url'}
+        {id: 'release_date', title: 'Release-Date'},
+        {id: 'spotify_url', title: 'Spotify-Url'},
     ]
   });
 
@@ -253,7 +268,7 @@ async function authorizeSpotifyAccount() {
         client_id: process.env.CLIENT_ID,
         scope: SCOPE,
         redirect_uri: REDIRECT_URI,
-        show_dialog: true
+        show_dialog: false
       }));
 
   startSpinner('  Waiting for some action to happen at your browser..', true);
